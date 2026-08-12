@@ -22,12 +22,13 @@ struct SettingsView: View {
     @State private var isResettingData = false
     @State private var showPaywall = false
 
-    @Bindable var defaults = UserDefaultsManager.shared
     private let db = DatabaseManager.shared
     private let privacyService = PrivacyService.shared
     private let store = StoreManager.shared
 
     var body: some View {
+        @Bindable var defaults = UserDefaultsManager.shared
+
         NavigationStack {
             List {
                 // MARK: - 用户画像
@@ -295,7 +296,7 @@ struct SettingsView: View {
             try await privacyService.clearAllData(preserveCollection: false)
             // 重建默认画像
             userProfile = UserProfile()
-            defaults.resetAll()
+            UserDefaultsManager.shared.resetAll()
         } catch {
             print("[Settings] Failed to reset data: \(error)")
         }
