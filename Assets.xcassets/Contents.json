@@ -1,0 +1,9 @@
+{
+  "info" : {
+    "author" : "yioracle",
+    "version" : 1
+  },
+  "properties" : {
+    "generate-swift-asset-symbol-extensions" : "enabled"
+  }
+}

@@ -1,0 +1,24 @@
+name: Yi Oracle iOS Build
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+# Builds the YiOracle Swift Package (library) for iOS on a real Mac
+# runner via Xcode. Validates that all 31 source files compile against
+# the iOS SDK. (The @main app entry YiOracleApp.swift is intentionally
+# outside the package sources; it is compiled in the Xcode app target.)
+jobs:
+  build-ios:
+    name: Build YiOracle (iOS)
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Build for iOS (Swift Package)
+        run: xcodebuild -scheme YiOracle -destination 'generic/platform=iOS' build

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>products</key>
+    <array>
+        <dict>
+            <key>id</key>
+            <string>com.yioracle.lifetime</string>
+            <key>name</key>
+            <string>Lifetime Access</string>
+            <key>type</key>
+            <string>non-consumable</string>
+            <key>price</key>
+            <string>39.99</string>
+            <key>familyShareable</key>
+            <true/>
+        </dict>
+        <dict>
+            <key>id</key>
+            <string>com.yioracle.deepreading</string>
+            <key>name</key>
+            <string>Deep Reading</string>
+            <key>type</key>
+            <string>consumable</string>
+            <key>price</key>
+            <string>1.99</string>
+        </dict>
+        <dict>
+            <key>id</key>
+            <string>com.yioracle.topicpack</string>
+            <key>name</key>
+            <string>Topic Pack</string>
+            <key>type</key>
+            <string>consumable</string>
+            <key>price</key>
+            <string>3.99</string>
+        </dict>
+        <dict>
+            <key>id</key>
+            <string>com.yioracle.yearlyreport</string>
+            <key>name</key>
+            <string>Yearly Report</string>
+            <key>type</key>
+            <string>consumable</string>
+            <key>price</key>
+            <string>19.99</string>
+        </dict>
+    </array>
+</dict>
+</plist>

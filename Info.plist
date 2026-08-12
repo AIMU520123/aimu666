@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>Yi Oracle</string>
+    <key>CFBundleDisplayName</key>
+    <string>Yi Oracle — Daily Reflection</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.yioracle.app</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+    <key>UIRequiredDeviceCapabilities</key>
+    <array>
+        <string>arm64</string>
+        <string>metal</string>
+    </array>
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+    </array>
+    <key>UIApplicationSupportsIndirectInputEvents</key>
+    <true/>
+    <key>UILaunchScreen</key>
+    <dict>
+        <key>UIColorName</key>
+        <string>LaunchBackground</string>
+    </dict>
+    <!-- 隐私声明：零网络权限申请 -->
+    <key>NSLocalNetworkUsageDescription</key>
+    <string>Yi Oracle does not use networking. All data stays on your device.</string>
+    <!-- 不申请任何网络权限 — App完全离线 -->
+    <key>NSCameraUsageDescription</key>
+    <string>Yi Oracle does not use the camera.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Yi Oracle does not access your photo library.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Yi Oracle does not use the microphone.</string>
+    <!-- 支持的语言 -->
+    <key>CFBundleLocalizations</key>
+    <array>
+        <string>en</string>
+        <string>zh-Hans</string>
+        <string>zh-Hant</string>
+        <string>ja</string>
+        <string>ko</string>
+    </array>
+    <!-- App Store 元数据 -->
+    <key>ITSAppUsesNonExemptEncryption</key>
+    <false/>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.lifestyle</string>
+</dict>
+</plist>

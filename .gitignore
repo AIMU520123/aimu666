@@ -1,0 +1,15 @@
+# Swift build artifacts
+.build/
+.swiftpm/
+Packages/
+xcuserdata/
+DerivedData/
+*.xcodeproj
+*.xcworkspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets / local config
+*.env
