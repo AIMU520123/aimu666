@@ -29,6 +29,7 @@ struct TodayReflectionView: View {
     @State private var hasCompletedTodayReflection = false
     @State private var isAnimating = false
     @State private var shareImage: IdentifiableImage?
+    @State private var selectedSkin: ReflectionCardSkin = .ink
 
     private let templateService = TemplatePoolService.shared
     private let matcher = HexagramMatcher.shared
@@ -273,6 +274,35 @@ struct TodayReflectionView: View {
                     }
                     .buttonStyle(.plain)
 
+                    // 分享卡皮肤选择（墨/金/玉，离线确定配色，提升社媒观感）
+                    HStack(spacing: 12) {
+                        Text("Card style")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        ForEach(ReflectionCardSkin.allCases) { skin in
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    selectedSkin = skin
+                                }
+                            } label: {
+                                Circle()
+                                    .fill(skin.swatch)
+                                    .frame(width: 22, height: 22)
+                                    .overlay(
+                                        Circle()
+                                            .stroke(selectedSkin == skin ?
+                                                    theme.palette.ink : .clear, lineWidth: 2)
+                                    )
+                                    .overlay(
+                                        Circle()
+                                            .stroke(.white, lineWidth: 1)
+                                    )
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+
                     // 分享反思卡（离线渲染，出设备仅静态图，符合隐私定位）
                     Button {
                         renderAndShare()
@@ -422,7 +452,7 @@ struct TodayReflectionView: View {
     private func renderAndShare() {
         guard let hex = todayHexagram, let tpl = todayTemplate else { return }
         let signature = YiPersona.insight(forHexagramID: hex.id).signature
-        let card = ReflectionCard(hexagram: hex, template: tpl, theme: theme, signature: signature)
+        let card = ReflectionCard(hexagram: hex, template: tpl, skin: selectedSkin, signature: signature)
         let renderer = ImageRenderer(content: card)
         renderer.scale = UIScreen.main.scale
         if let uiImage = renderer.uiImage {

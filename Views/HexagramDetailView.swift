@@ -68,6 +68,9 @@ struct HexagramDetailView: View {
                 // 核心含义
                 coreMeaningSection
 
+                // 今日之时：把卦象翻译成「当下阶段」的反思叙事（非预测），与今日反思主界面一致
+                yiMomentSection
+
                 // 卦辞
                 judgementSection
 
@@ -223,6 +226,28 @@ struct HexagramDetailView: View {
                 .background(
                     RoundedRectangle(cornerRadius: 12)
                         .fill(theme.palette.ink.opacity(0.04))
+                )
+        }
+    }
+
+    /// Yi 的当下映照：用 YiPersona 的 phase 文案，把卦象译成「此刻阶段」而非预测，
+    /// 既强化人格一致性，也稳过 App Store 对算命类 App 的审查。
+    private var yiMomentSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            sectionTitle("Yi's Mirror")
+
+            let phase = YiPersona.insight(forHexagramID: hexagram.id).phase
+            Text("Right now, \(hexagram.nameEN) invites you to \(phase).")
+                .font(.body)
+                .foregroundColor(theme.palette.accent)
+                .italic()
+                .lineSpacing(6)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 12)
+                        .fill(theme.palette.accent.opacity(0.06))
                 )
         }
     }
