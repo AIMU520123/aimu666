@@ -415,6 +415,16 @@ struct HexagramShareCard: View {
                 .lineSpacing(6)
                 .fixedSize(horizontal: false, vertical: true)
 
+            // 今日之时：与详情页 Yi's Mirror、今日反思主界面同源的「当下阶段」叙事（非预测）
+            let phase = YiPersona.insight(forHexagramID: hexagram.id).phase
+            Text("Right now, \(hexagram.nameEN) invites you to \(phase).")
+                .font(.title3)
+                .italic()
+                .foregroundColor(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 48)
+                .fixedSize(horizontal: false, vertical: true)
+
             Spacer()
 
             Text("Yi Oracle — a mirror, not a fortune")
