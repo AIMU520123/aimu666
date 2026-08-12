@@ -54,6 +54,7 @@ let package = Package(
             ],
             path: ".",
             sources: [
+                "AppState.swift",
                 "Theme.swift",
                 "Models/",
                 "Views/",
