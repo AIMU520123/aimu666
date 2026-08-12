@@ -70,11 +70,12 @@ struct ChatView: View {
 
                         // 对话消息
                         ForEach(conversation.messages) { message in
-                            MessageBubbleView(
-                                message: message,
-                                theme: theme,
-                                relevantHexagrams: relevantHexagrams
-                            )
+                        MessageBubbleView(
+                            message: message,
+                            theme: theme,
+                            relevantHexagrams: relevantHexagrams,
+                            activeCasting: conversation.activeCasting
+                        )
                             .id(message.id)
                         }
 
@@ -311,7 +312,7 @@ struct ChatView: View {
                 return nil
             }
             let transformed = cr.transformedHexagramID.flatMap { HexagramDataStore.shared.hexagram(byID: $0) }
-            let nuclear = HexagramDataStore.shared.hexagram(byID: cr.nuclearHexagramID)
+            let nuclear = cr.nuclearHexagramID.flatMap { HexagramDataStore.shared.hexagram(byID: $0) }
             return ActiveReading(
                 primary: primary,
                 transformed: transformed,
@@ -416,6 +417,58 @@ struct ChatView: View {
         "In the United States, you can call or text 988. You are not alone. " +
         "Would you like to sit with me for a moment and just breathe?"
     }
+
+    // MARK: - 进行中的读法横幅（锚定起卦时展示，保持易经逻辑连续性）
+
+    /// 进行中的读法横幅：一眼看清本次对话锚定的起卦与演化方向。
+    private var activeReadingBanner: some View {
+        guard let cr = conversation.activeCasting,
+              let primary = HexagramDataStore.shared.hexagram(byID: cr.primaryHexagramID) else {
+            return AnyView(EmptyView())
+        }
+        let transformed = cr.transformedHexagramID.flatMap { HexagramDataStore.shared.hexagram(byID: $0) }
+        let linePos = cr.changingLineIndices.map { $0 + 1 }.sorted()
+
+        return AnyView(
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 6) {
+                    Image(systemName: "link.circle.fill")
+                        .foregroundColor(theme.palette.accent)
+                    Text("Active Reading")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(theme.palette.ink)
+                    Spacer()
+                }
+                HStack(spacing: 6) {
+                    Text("\(primary.symbol) \(primary.nameEN)")
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(theme.palette.ink)
+                    if let t = transformed {
+                        Image(systemName: "arrow.right")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Text("\(t.symbol) \(t.nameEN)")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(theme.palette.ink)
+                    }
+                }
+                if !linePos.isEmpty {
+                    Text("Changing lines: \(linePos.map { "Line \($0)" }.joined(separator: ", "))")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(12)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 12)
+                    .fill(theme.palette.accent.opacity(0.08))
+            )
+        )
+    }
 }
 
 // MARK: - 消息气泡视图
@@ -425,6 +478,7 @@ struct MessageBubbleView: View {
     let message: Message
     let theme: AppTheme
     let relevantHexagrams: [Hexagram]
+    let activeCasting: ActiveCastingAnchor?
 
     var body: some View {
         HStack(alignment: .top) {
@@ -462,10 +516,10 @@ struct MessageBubbleView: View {
                 if message.role == .yi,
                    let hid = message.attachedHexagramID,
                    let hex = HexagramDataStore.shared.hexagram(byID: hid) {
-                    let transformed = conversation.activeCasting?
-                        .transformedHexagramID
-                        .flatMap { HexagramDataStore.shared.hexagram(byID: $0) }
-                    let changing = conversation.activeCasting?.changingLineIndices ?? []
+                let transformed = activeCasting?
+                    .transformedHexagramID
+                    .flatMap { HexagramDataStore.shared.hexagram(byID: $0) }
+                let changing = activeCasting?.changingLineIndices ?? []
                     canonicalBasisCard(
                         primary: hex,
                         transformed: transformed,
@@ -517,56 +571,6 @@ struct MessageBubbleView: View {
         .background(
             RoundedRectangle(cornerRadius: 12)
                 .fill(theme.palette.ink.opacity(0.04))
-        )
-    }
-
-    /// 进行中的读法横幅：一眼看清本次对话锚定的起卦与演化方向。
-    private var activeReadingBanner: some View {
-        guard let cr = conversation.activeCasting,
-              let primary = HexagramDataStore.shared.hexagram(byID: cr.primaryHexagramID) else {
-            return AnyView(EmptyView())
-        }
-        let transformed = cr.transformedHexagramID.flatMap { HexagramDataStore.shared.hexagram(byID: $0) }
-        let linePos = cr.changingLineIndices.map { $0 + 1 }.sorted()
-
-        return AnyView(
-            VStack(alignment: .leading, spacing: 4) {
-                HStack(spacing: 6) {
-                    Image(systemName: "link.circle.fill")
-                        .foregroundColor(theme.palette.accent)
-                    Text("Active Reading")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(theme.palette.ink)
-                    Spacer()
-                }
-                HStack(spacing: 6) {
-                    Text("\(primary.symbol) \(primary.nameEN)")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(theme.palette.ink)
-                    if let t = transformed {
-                        Image(systemName: "arrow.right")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Text("\(t.symbol) \(t.nameEN)")
-                            .font(.subheadline)
-                            .fontWeight(.medium)
-                            .foregroundColor(theme.palette.ink)
-                    }
-                }
-                if !linePos.isEmpty {
-                    Text("Changing lines: \(linePos.map { "Line \($0)" }.joined(separator: ", "))")
-                        .font(.caption2)
-                        .foregroundColor(.secondary)
-                }
-            }
-            .padding(12)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(theme.palette.accent.opacity(0.08))
-            )
         )
     }
 }

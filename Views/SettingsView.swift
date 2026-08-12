@@ -22,7 +22,7 @@ struct SettingsView: View {
     @State private var isResettingData = false
     @State private var showPaywall = false
 
-    private let defaults = UserDefaultsManager.shared
+    @Bindable var defaults = UserDefaultsManager.shared
     private let db = DatabaseManager.shared
     private let privacyService = PrivacyService.shared
     private let store = StoreManager.shared

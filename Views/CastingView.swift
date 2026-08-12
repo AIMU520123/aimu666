@@ -194,7 +194,7 @@ struct CastingView: View {
                         .foregroundColor(.secondary)
                         .padding(.bottom, 12)
 
-                    HexagramLinesView(lines: generatedLines)
+                    HexagramLinesView(lines: generatedLines, color: theme.palette.ink)
                         .frame(height: min(60, CGFloat(generatedLines.count * 16)))
                 }
             }
@@ -250,7 +250,7 @@ struct CastingView: View {
                     .padding(.horizontal)
 
                 // 爻线显示
-                HexagramLinesView(lines: hex.lines)
+                HexagramLinesView(lines: hex.lines, color: theme.palette.ink)
                     .frame(height: 80)
 
                 // 变爻信息

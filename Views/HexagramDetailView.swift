@@ -58,7 +58,7 @@ struct HexagramDetailView: View {
                 }
 
                 // 六爻线条渲染
-                HexagramLinesView(lines: hexagram.lines)
+                HexagramLinesView(lines: hexagram.lines, color: theme.palette.ink)
                     .frame(height: 100)
                     .padding(.vertical, 4)
 
