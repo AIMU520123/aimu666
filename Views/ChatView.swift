@@ -182,7 +182,7 @@ struct ChatView: View {
 
     private var greetingForUser: String {
         if userProfile.isNewUser {
-            return "Hi! I'm Yi. I don't know much about you yet, but I'm looking forward to our journey together. What's on your mind today?"
+            return "Hi! I'm Yi. \(YiPersona.chatGreeting)"
         }
         let name = userProfile.displayName.isEmpty ? "there" : userProfile.displayName
         return "Welcome back, \(name). I've been looking forward to our conversation. How are you feeling today?"

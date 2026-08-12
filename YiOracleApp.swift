@@ -93,7 +93,7 @@ struct OnboardingView: View {
             title: "Welcome to Yi Oracle",
             subtitle: "A quiet space for daily reflection, guided by ancient wisdom",
             icon: "sparkles",
-            description: "I'm Yi — not a fortune teller, but a companion who draws from the 3,000-year-old Book of Changes to help you see your life with fresh eyes."
+            description: "I'm Yi, not a fortune teller, but a companion who draws from the 3,000-year-old Book of Changes to help you see your life with fresh eyes.\n\n\"\(YiPersona.catchphrase)\""
         ),
         OnboardingPage(
             title: "A Hexagram Is a Mirror",

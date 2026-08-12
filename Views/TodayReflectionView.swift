@@ -28,6 +28,7 @@ struct TodayReflectionView: View {
     @State private var showMoreOptions = false
     @State private var hasCompletedTodayReflection = false
     @State private var isAnimating = false
+    @State private var shareImage: IdentifiableImage?
 
     private let templateService = TemplatePoolService.shared
     private let matcher = HexagramMatcher.shared
@@ -62,6 +63,9 @@ struct TodayReflectionView: View {
             }
             .sheet(isPresented: $showCastingSheet) {
                 CastingView(userProfile: $userProfile)
+            }
+            .sheet(item: $shareImage) { item in
+                ShareSheet(activityItems: [item.image])
             }
             .task {
                 await loadTodayContent()
@@ -205,6 +209,15 @@ struct TodayReflectionView: View {
                         .font(.title3)
                         .fontWeight(.semibold)
 
+                    // 今日之时：把卦象翻译成「当下阶段」的反思叙事（非预测），强化 Yi 人格与易经「时」的哲学
+                    if let hex = todayHexagram {
+                        let phase = YiPersona.insight(forHexagramID: hex.id).phase
+                        Text("Right now, \(hex.nameEN) invites you to \(phase).")
+                            .font(.subheadline)
+                            .foregroundColor(theme.palette.accent)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+
                     Text(template.content)
                         .font(.body)
                         .foregroundColor(.primary)
@@ -257,6 +270,20 @@ struct TodayReflectionView: View {
                         }
                         .foregroundColor(hasCompletedTodayReflection ?
                                          theme.palette.ink : .secondary)
+                    }
+                    .buttonStyle(.plain)
+
+                    // 分享反思卡（离线渲染，出设备仅静态图，符合隐私定位）
+                    Button {
+                        renderAndShare()
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "square.and.arrow.up")
+                                .font(.title3)
+                            Text("Share this card")
+                                .font(.subheadline)
+                        }
+                        .foregroundColor(theme.palette.accent)
                     }
                     .buttonStyle(.plain)
                 }
@@ -339,6 +366,15 @@ struct TodayReflectionView: View {
                         .font(.title3)
                     Text(UserDefaultsManager.shared.softenDivinationLanguage ? "Reflect with the coins" : "Cast the Coins")
                         .fontWeight(.medium)
+                    if userProfile.castsUsedTotal < UserProfile.freeCastAllowance {
+                        Text("Free")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 3)
+                            .background(Capsule().fill(theme.palette.accentSoft))
+                            .foregroundColor(theme.palette.accent)
+                    }
                     Spacer()
                     Image(systemName: "chevron.right")
                         .font(.subheadline)
@@ -380,6 +416,18 @@ struct TodayReflectionView: View {
     private func loadTodayContent() async {
         todayHexagram = matcher.recommendTodayHexagram(for: userProfile)
         todayTemplate = templateService.getTodayTemplate(for: userProfile)
+    }
+
+    /// 离线渲染反思卡为图片并唤起系统分享（数据不出设备）
+    private func renderAndShare() {
+        guard let hex = todayHexagram, let tpl = todayTemplate else { return }
+        let signature = YiPersona.insight(forHexagramID: hex.id).signature
+        let card = ReflectionCard(hexagram: hex, template: tpl, theme: theme, signature: signature)
+        let renderer = ImageRenderer(content: card)
+        renderer.scale = UIScreen.main.scale
+        if let uiImage = renderer.uiImage {
+            shareImage = IdentifiableImage(image: uiImage)
+        }
     }
 }
 

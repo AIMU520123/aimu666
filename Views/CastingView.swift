@@ -138,6 +138,20 @@ struct CastingView: View {
 
             Spacer().frame(height: 20)
 
+            // 免费额度提示（强化「前 N 次免费」钩子，降低西方用户首次起卦门槛）
+            if !StoreManager.shared.isPremium {
+                let remaining = max(0, UserProfile.freeCastAllowance - userProfile.castsUsedTotal)
+                HStack(spacing: 6) {
+                    Image(systemName: "gift")
+                        .font(.caption)
+                        .foregroundColor(theme.palette.accent)
+                    Text("Your first \(UserProfile.freeCastAllowance) casts are free. \(remaining) left.")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                .padding(.top, 2)
+            }
+
             // 开始掷币按钮（免费额度拦截：非买断用户累计起卦达上限后引导付费墙）
             Button {
                 let store = StoreManager.shared
