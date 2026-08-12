@@ -30,199 +30,13 @@ struct SettingsView: View {
     var body: some View {
         NavigationStack {
             List {
-                // MARK: - 用户画像
-                Section {
-                    HStack {
-                        Image(systemName: "person.circle.fill")
-                            .font(.title)
-                            .foregroundColor(Color("YiInk"))
-
-                        VStack(alignment: .leading, spacing: 4) {
-                            TextField("Your Name", text: $userProfile.displayName)
-                                .font(.headline)
-
-                            Text("Collection: \(userProfile.unlockedHexagramIDs.count)/64 hexagrams")
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    .padding(.vertical, 4)
-
-                    TextField("A short bio...", text: $userProfile.bio, axis: .vertical)
-                        .font(.subheadline)
-                        .lineLimit(1...3)
-
-                    // 互动风格
-                    Picker("Casting Style", selection: $userProfile.castingStyle) {
-                        ForEach(CastingStyle.allCases, id: \.self) { style in
-                            Text(style.description).tag(style)
-                        }
-                    }
-                } header: {
-                    Text("Profile")
-                }
-
-                // MARK: - 界面风格（皮肤）
-                Section {
-                    VStack(spacing: 12) {
-                        ForEach(AppTheme.allCases) { theme in
-                            themeCard(theme)
-                        }
-                    }
-                    .padding(.vertical, 4)
-                } header: {
-                    Text("Interface Style")
-                } footer: {
-                    Text("Choose the visual world that feels most like home. Switch any time — your reflections stay the same.")
-                }
-
-                // MARK: - 外观
-                Section {
-                    Picker("Color Theme", selection: $defaults.colorTheme) {
-                        Text("System").tag("system")
-                        Text("Light").tag("light")
-                        Text("Dark").tag("dark")
-                    }
-
-                    Picker("Language", selection: $userProfile.preferredLanguage) {
-                        ForEach(Language.allCases, id: \.self) { lang in
-                            Text(lang.displayName).tag(lang)
-                        }
-                    }
-                    .footer {
-                        Text("Full readings are generated in English in this build. Other languages adjust the interface text only.")
-                    }
-
-                    Toggle("Haptic Feedback", isOn: $defaults.enableHaptics)
-
-                    Toggle("Sound Effects", isOn: $defaults.enableSound)
-
-                    Toggle("Simplify divination language", isOn: $defaults.softenDivinationLanguage)
-                        .footer {
-                            Text("Replaces casting-style wording with neutral reflection wording across the app, for App Store review resilience.")
-                        }
-                } header: {
-                    Text("Appearance")
-                }
-
-                // MARK: - 每日反思
-                Section {
-                    Toggle("Daily Reflection Reminder", isOn: $defaults.dailyReflectionReminder)
-
-                    if defaults.dailyReflectionReminder {
-                        HStack {
-                            Text("Reminder Time")
-                            Spacer()
-                            Text(defaults.reflectionReminderTime)
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                } header: {
-                    Text("Daily Reflection")
-                } footer: {
-                    Text("Yi will send you a gentle reminder to pause and reflect each day.")
-                }
-
-                // MARK: - 数据与隐私
-                Section {
-                    // 数据量
-                    HStack {
-                        Label("Local Data", systemImage: "internaldrive")
-                        Spacer()
-                        Text(privacyService.estimateDataSize())
-                            .foregroundColor(.secondary)
-                    }
-
-                    // 隐私声明
-                    Button {
-                        showingPrivacyStatement = true
-                    } label: {
-                        Label("Privacy Statement", systemImage: "hand.raised")
-                            .foregroundColor(Color("YiInk"))
-                    }
-
-                    // 清除所有记忆
-                    Button(role: .destructive) {
-                        showingResetConfirmation = true
-                    } label: {
-                        HStack {
-                            Label("Clear All Memory", systemImage: "trash")
-                            if isResettingData {
-                                Spacer()
-                                ProgressView()
-                            }
-                        }
-                    }
-                    .disabled(isResettingData)
-                } header: {
-                    Text("Data & Privacy")
-                } footer: {
-                    Text("Your conversations, reflections, and personal data live only on this device. No data is ever uploaded to any server.")
-                }
-
-                // MARK: - 购买信息
-                Section {
-                    if store.isPremium {
-                        HStack {
-                            Label("Lifetime Access", systemImage: "infinity")
-                            Spacer()
-                            Text("Purchased")
-                                .foregroundColor(.secondary)
-                        }
-                        if let date = defaults.purchaseDate {
-                            HStack {
-                                Label("Purchased On", systemImage: "calendar")
-                                Spacer()
-                                Text(date, style: .date)
-                                    .foregroundColor(.secondary)
-                            }
-                        }
-                    } else {
-                        // 未购买：点击进入付费墙
-                        Button {
-                            showPaywall = true
-                        } label: {
-                            Label("Unlock Lifetime Access", systemImage: "infinity")
-                                .foregroundColor(Color("YiInk"))
-                        }
-                        Button {
-                            Task { await store.restorePurchases() }
-                        } label: {
-                            Label("Restore Purchases", systemImage: "arrow.clockwise")
-                                .foregroundColor(Color("YiInk"))
-                        }
-                    }
-                } header: {
-                    Text("Purchase")
-                } footer: {
-                    Text("Free forever: daily reflection & your daily hexagram. Lifetime unlocks everything else — one payment, no subscription, no data selling.")
-                }
-
-                // MARK: - 关于
-                Section {
-                    HStack {
-                        Label("Version", systemImage: "info.circle")
-                        Spacer()
-                        Text(defaults.appVersion)
-                            .foregroundColor(.secondary)
-                    }
-
-                    HStack {
-                        Label("First Launched", systemImage: "clock")
-                        Spacer()
-                        Text(defaults.firstLaunchDate, style: .date)
-                            .foregroundColor(.secondary)
-                    }
-
-                    HStack {
-                        Label("Total Reflections", systemImage: "sparkles")
-                        Spacer()
-                        Text("\(userProfile.totalInteractions)")
-                            .foregroundColor(.secondary)
-                    }
-                } header: {
-                    Text("About")
-                }
+                profileSection
+                interfaceStyleSection
+                appearanceSection
+                dailyReflectionSection
+                dataPrivacySection
+                purchaseSection
+                aboutSection
             }
             .navigationTitle("Settings")
             .sheet(isPresented: $showingPrivacyStatement) {
@@ -234,14 +48,10 @@ struct SettingsView: View {
                 titleVisibility: .visible
             ) {
                 Button("Clear Everything", role: .destructive) {
-                    Task {
-                        await resetAllData()
-                    }
+                    Task { await resetAllData() }
                 }
                 Button("Clear Conversations Only") {
-                    Task {
-                        await clearConversationsOnly()
-                    }
+                    Task { await clearConversationsOnly() }
                 }
                 Button("Cancel", role: .cancel) { }
             } message: {
@@ -267,6 +77,203 @@ struct SettingsView: View {
             .sheet(isPresented: $showPaywall) {
                 PaywallView()
             }
+        }
+    }
+
+    // MARK: - Sections
+
+    private var profileSection: some View {
+        Section {
+            HStack {
+                Image(systemName: "person.circle.fill")
+                    .font(.title)
+                    .foregroundColor(Color("YiInk"))
+
+                VStack(alignment: .leading, spacing: 4) {
+                    TextField("Your Name", text: $userProfile.displayName)
+                        .font(.headline)
+                    Text("Collection: \(userProfile.unlockedHexagramIDs.count)/64 hexagrams")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            .padding(.vertical, 4)
+
+            TextField("A short bio...", text: $userProfile.bio, axis: .vertical)
+                .font(.subheadline)
+                .lineLimit(1...3)
+
+            Picker("Casting Style", selection: $userProfile.castingStyle) {
+                ForEach(CastingStyle.allCases, id: \.self) { style in
+                    Text(style.description).tag(style)
+                }
+            }
+        } header: {
+            Text("Profile")
+        }
+    }
+
+    private var interfaceStyleSection: some View {
+        Section {
+            VStack(spacing: 12) {
+                ForEach(AppTheme.allCases) { theme in
+                    themeCard(theme)
+                }
+            }
+            .padding(.vertical, 4)
+        } header: {
+            Text("Interface Style")
+        } footer: {
+            Text("Choose the visual world that feels most like home. Switch any time — your reflections stay the same.")
+        }
+    }
+
+    private var appearanceSection: some View {
+        Section {
+            Picker("Color Theme", selection: $defaults.colorTheme) {
+                Text("System").tag("system")
+                Text("Light").tag("light")
+                Text("Dark").tag("dark")
+            }
+
+            Picker("Language", selection: $userProfile.preferredLanguage) {
+                ForEach(Language.allCases, id: \.self) { lang in
+                    Text(lang.displayName).tag(lang)
+                }
+            }
+            .footer {
+                Text("Full readings are generated in English in this build. Other languages adjust the interface text only.")
+            }
+
+            Toggle("Haptic Feedback", isOn: $defaults.enableHaptics)
+
+            Toggle("Sound Effects", isOn: $defaults.enableSound)
+
+            Toggle("Simplify divination language", isOn: $defaults.softenDivinationLanguage)
+                .footer {
+                    Text("Replaces casting-style wording with neutral reflection wording across the app, for App Store review resilience.")
+                }
+        } header: {
+            Text("Appearance")
+        }
+    }
+
+    private var dailyReflectionSection: some View {
+        Section {
+            Toggle("Daily Reflection Reminder", isOn: $defaults.dailyReflectionReminder)
+
+            if defaults.dailyReflectionReminder {
+                HStack {
+                    Text("Reminder Time")
+                    Spacer()
+                    Text(defaults.reflectionReminderTime)
+                        .foregroundColor(.secondary)
+                }
+            }
+        } header: {
+            Text("Daily Reflection")
+        } footer: {
+            Text("Yi will send you a gentle reminder to pause and reflect each day.")
+        }
+    }
+
+    private var dataPrivacySection: some View {
+        Section {
+            HStack {
+                Label("Local Data", systemImage: "internaldrive")
+                Spacer()
+                Text(privacyService.estimateDataSize())
+                    .foregroundColor(.secondary)
+            }
+
+            Button {
+                showingPrivacyStatement = true
+            } label: {
+                Label("Privacy Statement", systemImage: "hand.raised")
+                    .foregroundColor(Color("YiInk"))
+            }
+
+            Button(role: .destructive) {
+                showingResetConfirmation = true
+            } label: {
+                HStack {
+                    Label("Clear All Memory", systemImage: "trash")
+                    if isResettingData {
+                        Spacer()
+                        ProgressView()
+                    }
+                }
+            }
+            .disabled(isResettingData)
+        } header: {
+            Text("Data & Privacy")
+        } footer: {
+            Text("Your conversations, reflections, and personal data live only on this device. No data is ever uploaded to any server.")
+        }
+    }
+
+    private var purchaseSection: some View {
+        Section {
+            if store.isPremium {
+                HStack {
+                    Label("Lifetime Access", systemImage: "infinity")
+                    Spacer()
+                    Text("Purchased")
+                        .foregroundColor(.secondary)
+                }
+                if let date = defaults.purchaseDate {
+                    HStack {
+                        Label("Purchased On", systemImage: "calendar")
+                        Spacer()
+                        Text(date, style: .date)
+                            .foregroundColor(.secondary)
+                    }
+                }
+            } else {
+                Button {
+                    showPaywall = true
+                } label: {
+                    Label("Unlock Lifetime Access", systemImage: "infinity")
+                        .foregroundColor(Color("YiInk"))
+                }
+                Button {
+                    Task { await store.restorePurchases() }
+                } label: {
+                    Label("Restore Purchases", systemImage: "arrow.clockwise")
+                        .foregroundColor(Color("YiInk"))
+                }
+            }
+        } header: {
+            Text("Purchase")
+        } footer: {
+            Text("Free forever: daily reflection & your daily hexagram. Lifetime unlocks everything else — one payment, no subscription, no data selling.")
+        }
+    }
+
+    private var aboutSection: some View {
+        Section {
+            HStack {
+                Label("Version", systemImage: "info.circle")
+                Spacer()
+                Text(defaults.appVersion)
+                    .foregroundColor(.secondary)
+            }
+
+            HStack {
+                Label("First Launched", systemImage: "clock")
+                Spacer()
+                Text(defaults.firstLaunchDate, style: .date)
+                    .foregroundColor(.secondary)
+            }
+
+            HStack {
+                Label("Total Reflections", systemImage: "sparkles")
+                Spacer()
+                Text("\(userProfile.totalInteractions)")
+                    .foregroundColor(.secondary)
+            }
+        } header: {
+            Text("About")
         }
     }
 
