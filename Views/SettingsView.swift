@@ -141,18 +141,20 @@ struct SettingsView: View {
                     Text(lang.displayName).tag(lang)
                 }
             }
-            .footer {
-                Text("Full readings are generated in English in this build. Other languages adjust the interface text only.")
-            }
+
+            Text("Full readings are generated in English in this build. Other languages adjust the interface text only.")
+                .font(.caption)
+                .foregroundColor(.secondary)
 
             Toggle("Haptic Feedback", isOn: $defaults.enableHaptics)
 
             Toggle("Sound Effects", isOn: $defaults.enableSound)
 
             Toggle("Simplify divination language", isOn: $defaults.softenDivinationLanguage)
-                .footer {
-                    Text("Replaces casting-style wording with neutral reflection wording across the app, for App Store review resilience.")
-                }
+
+            Text("Replaces casting-style wording with neutral reflection wording across the app, for App Store review resilience.")
+                .font(.caption)
+                .foregroundColor(.secondary)
         } header: {
             Text("Appearance")
         }
