@@ -82,18 +82,9 @@ struct ReflectionCard: View {
 }
 
 /// 把 UIImage 接入 SwiftUI 的 sheet(item:)
+/// 注：ShareSheet 已在 HexagramDetailView.swift 定义，本模块复用，不再重复声明。
 struct IdentifiableImage: Identifiable {
     let id = UUID()
+
     let image: UIImage
-}
-
-/// 系统分享面板（离线，不依赖任何云服务）
-struct ShareSheet: UIViewControllerRepresentable {
-    let activityItems: [Any]
-
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
-    }
-
-    func updateUIViewController(_ vc: UIActivityViewController, context: Context) {}
 }
