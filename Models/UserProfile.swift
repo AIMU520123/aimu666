@@ -79,7 +79,7 @@ final class UserProfile: Codable {
     /// - 中断超过一天：streak 重置为 1
     /// 返回更新后的 streakDays
     @discardableResult
-    mutating func recordReflection() -> Int {
+    func recordReflection() -> Int {
         reflectionCountTotal += 1
         lastActiveDate = Date()
 

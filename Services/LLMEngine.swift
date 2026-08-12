@@ -60,7 +60,7 @@ protocol LLMEngineProtocol {
 /// - 平静、温暖、有哲理
 /// - 引用易经智慧但不教条
 /// - 关注用户情感，因材施教
-actor MockLLMEngine: LLMEngineProtocol {
+final class MockLLMEngine: LLMEngineProtocol {
     private(set) var isModelLoaded = false
     private(set) var modelName = "Mock-LLM"
 
