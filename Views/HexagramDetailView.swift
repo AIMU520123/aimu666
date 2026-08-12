@@ -34,6 +34,7 @@ struct HexagramDetailView: View {
     /// 分享卡导出
     @State private var shareImage: UIImage? = nil
     @State private var showShareSheet = false
+    @State private var selectedShareSkin: ReflectionCardSkin = .ink
 
     private let store = StoreManager.shared
     private let matcher = HexagramMatcher.shared
@@ -114,13 +115,15 @@ struct HexagramDetailView: View {
                             .foregroundColor(theme.palette.ink)
                     }
 
-                    // 分享（借 Co-Star 式裂变补 Referral 缺口）
-                    Button {
-                        let renderer = ImageRenderer(content: HexagramShareCard(hexagram: hexagram))
-                        renderer.proposedSize = .init(width: 1080, height: 1350)
-                        if let image = renderer.uiImage {
-                            shareImage = image
-                            showShareSheet = true
+                    // 分享（借 Co-Star 式裂变补 Referral 缺口），含三套皮肤选择
+                    Menu {
+                        ForEach(ReflectionCardSkin.allCases) { skin in
+                            Button {
+                                shareWithSkin(skin)
+                            } label: {
+                                Label(skin.displayName,
+                                      systemImage: selectedShareSkin == skin ? "checkmark.circle.fill" : "circle")
+                            }
                         }
                     } label: {
                         Image(systemName: "square.and.arrow.up")
@@ -384,32 +387,45 @@ struct HexagramDetailView: View {
             print("Failed to unlock: \(error)")
         }
     }
+
+    /// 离线渲染竖版分享卡为图片并唤起系统分享（数据不出设备）。皮肤由用户从菜单选定。
+    private func shareWithSkin(_ skin: ReflectionCardSkin) {
+        selectedShareSkin = skin
+        let renderer = ImageRenderer(content: HexagramShareCard(hexagram: hexagram, skin: skin))
+        renderer.proposedSize = .init(width: 1080, height: 1350)
+        if let image = renderer.uiImage {
+            shareImage = image
+            showShareSheet = true
+        }
+    }
 }
 
 // MARK: - 分享卡与分享出口
 
 /// 可导出为图片的卦象分享卡（定位"分享你的反思"，非"算命结果"）
+/// 支持三套皮肤（墨/金/玉），与今日反思页的 ReflectionCard 视觉系统一致。
 struct HexagramShareCard: View {
     let hexagram: Hexagram
+    let skin: ReflectionCardSkin
 
     var body: some View {
         VStack(spacing: 24) {
             Text(hexagram.symbol)
                 .font(.system(size: 160))
-                .foregroundColor(.black)
+                .foregroundColor(skin.ink)
 
             Text(hexagram.nameEN)
                 .font(.largeTitle)
                 .fontWeight(.semibold)
-                .foregroundColor(.black)
+                .foregroundColor(skin.ink)
 
             Text(hexagram.nameCN)
                 .font(.title2)
-                .foregroundColor(.gray)
+                .foregroundColor(skin.textPrimary)
 
             Text(hexagram.coreMeaning)
                 .font(.body)
-                .foregroundColor(.black)
+                .foregroundColor(skin.ink)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 48)
                 .lineSpacing(6)
@@ -420,7 +436,7 @@ struct HexagramShareCard: View {
             Text("Right now, \(hexagram.nameEN) invites you to \(phase).")
                 .font(.title3)
                 .italic()
-                .foregroundColor(.secondary)
+                .foregroundColor(skin.accent)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 48)
                 .fixedSize(horizontal: false, vertical: true)
@@ -429,11 +445,11 @@ struct HexagramShareCard: View {
 
             Text("Yi Oracle — a mirror, not a fortune")
                 .font(.caption)
-                .foregroundColor(.gray)
+                .foregroundColor(skin.textPrimary)
         }
         .padding(48)
         .frame(width: 1080, height: 1350)
-        .background(Color.white)
+        .background(skin.background)
     }
 }
 
