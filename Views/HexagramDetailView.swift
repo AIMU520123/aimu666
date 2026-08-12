@@ -32,9 +32,10 @@ struct HexagramDetailView: View {
     @State private var deepReadingCasting: CastingResult? = nil
 
     /// 分享卡导出
-    @State private var shareImage: UIImage? = nil
-    @State private var showShareSheet = false
+    @State private var shareImage: IdentifiableImage? = nil
     @State private var selectedShareSkin: ReflectionCardSkin = .ink
+    /// 分享奖励提示
+    @State private var rewardToast: String?
 
     private let store = StoreManager.shared
     private let matcher = HexagramMatcher.shared
@@ -135,9 +136,27 @@ struct HexagramDetailView: View {
         .sheet(item: $deepReadingCasting) { cr in
             ChatView(userProfile: $userProfile, initialCasting: cr)
         }
-        .sheet(isPresented: $showShareSheet) {
-            if let image = shareImage {
-                ShareSheet(activityItems: [image])
+        .sheet(item: $shareImage) { item in
+            ShareSheet(activityItems: [item.image]) { activityType in
+                handleShareReward(activityType)
+            }
+        }
+        .overlay(alignment: .bottom) {
+            if let msg = rewardToast {
+                Text(msg)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.white)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Capsule().fill(theme.palette.ink))
+                    .padding(.bottom, 30)
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.6) {
+                            rewardToast = nil
+                        }
+                    }
             }
         }
     }
@@ -394,8 +413,19 @@ struct HexagramDetailView: View {
         let renderer = ImageRenderer(content: HexagramShareCard(hexagram: hexagram, skin: skin))
         renderer.proposedSize = .init(width: 1080, height: 1350)
         if let image = renderer.uiImage {
-            shareImage = image
-            showShareSheet = true
+            shareImage = IdentifiableImage(image: image)
+        }
+    }
+
+    /// 分享完成回调：识别激励平台并授予一次免费起卦
+    private func handleShareReward(_ activityType: UIActivity.ActivityType?) {
+        guard let platform = qualifyingSharePlatform(activityType) else { return }
+        let granted = userProfile.grantShareReward(platform: platform.rawValue)
+        try? DatabaseManager.shared.saveUserProfile(userProfile)
+        if granted {
+            withAnimation {
+                rewardToast = "Shared to \(platform.displayName)! You earned a free cast."
+            }
         }
     }
 }
@@ -456,9 +486,15 @@ struct HexagramShareCard: View {
 /// UIActivityViewController 封装，用于系统分享面板
 struct ShareSheet: UIViewControllerRepresentable {
     let activityItems: [Any]
+    /// 分享完成时回调（completed 为 false 时传 nil，便于识别真实分享行为）
+    var onComplete: ((UIActivity.ActivityType?) -> Void)? = nil
 
     func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+        let vc = UIActivityViewController(activityItems: activityItems, applicationActivities: nil)
+        vc.completionWithItemsHandler = { activityType, completed, _, _ in
+            onComplete?(completed ? activityType : nil)
+        }
+        return vc
     }
 
     func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}

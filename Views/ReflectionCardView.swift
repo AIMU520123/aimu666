@@ -169,6 +169,32 @@ struct IdentifiableImage: Identifiable {
     let image: UIImage
 }
 
+// MARK: - 分享激励平台识别
+
+/// 可触发「送一次起卦」奖励的分享平台
+enum ShareRewardPlatform: String {
+    case tiktok = "tiktok"
+    case x = "x"
+
+    var displayName: String {
+        switch self {
+        case .tiktok: return "TikTok"
+        case .x: return "X"
+        }
+    }
+}
+
+/// 将系统分享回调的 activityType 映射到激励平台。返回 nil 表示非激励平台（无奖励）。
+/// iOS 隐私限制下第三方 App 的 activityType 为反域名字符串，TikTok 随版本/地区变化，做尽力匹配。
+func qualifyingSharePlatform(_ activityType: UIActivity.ActivityType?) -> ShareRewardPlatform? {
+    guard let raw = activityType?.rawValue.lowercased() else { return nil }
+    if raw.contains("twitter") { return .x }
+    if raw.contains("tiktok") || raw.contains("musically") || raw.contains("zhiliaoapp") {
+        return .tiktok
+    }
+    return nil
+}
+
 // MARK: - 颜色工具
 
 extension Color {

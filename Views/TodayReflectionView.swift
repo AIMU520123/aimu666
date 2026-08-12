@@ -29,6 +29,8 @@ struct TodayReflectionView: View {
     @State private var hasCompletedTodayReflection = false
     @State private var isAnimating = false
     @State private var shareImage: IdentifiableImage?
+    /// 分享奖励提示（送一次起卦的回执）
+    @State private var rewardToast: String?
     @State private var selectedSkin: ReflectionCardSkin = .ink
 
     private let templateService = TemplatePoolService.shared
@@ -58,6 +60,24 @@ struct TodayReflectionView: View {
                 .padding(.horizontal, 20)
             }
             .background(theme.palette.backgroundGradient)
+            .overlay(alignment: .bottom) {
+                if let msg = rewardToast {
+                    Text(msg)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(Capsule().fill(theme.palette.ink))
+                        .padding(.bottom, 90)
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                        .onAppear {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 2.6) {
+                                rewardToast = nil
+                            }
+                        }
+                }
+            }
             .navigationBarHidden(true)
             .sheet(isPresented: $showChatSheet) {
                 ChatView(userProfile: $userProfile)
@@ -66,7 +86,9 @@ struct TodayReflectionView: View {
                 CastingView(userProfile: $userProfile)
             }
             .sheet(item: $shareImage) { item in
-                ShareSheet(activityItems: [item.image])
+                ShareSheet(activityItems: [item.image]) { activityType in
+                    handleShareReward(activityType)
+                }
             }
             .task {
                 await loadTodayContent()
@@ -396,7 +418,7 @@ struct TodayReflectionView: View {
                         .font(.title3)
                     Text(UserDefaultsManager.shared.softenDivinationLanguage ? "Reflect with the coins" : "Cast the Coins")
                         .fontWeight(.medium)
-                    if userProfile.castsUsedTotal < UserProfile.freeCastAllowance {
+                    if userProfile.castsUsedTotal < userProfile.effectiveFreeCastAllowance {
                         Text("Free")
                             .font(.caption2)
                             .fontWeight(.bold)
@@ -457,6 +479,18 @@ struct TodayReflectionView: View {
         renderer.scale = UIScreen.main.scale
         if let uiImage = renderer.uiImage {
             shareImage = IdentifiableImage(image: uiImage)
+        }
+    }
+
+    /// 分享完成回调：识别激励平台并授予一次免费起卦（公司善意激励，封顶）
+    private func handleShareReward(_ activityType: UIActivity.ActivityType?) {
+        guard let platform = qualifyingSharePlatform(activityType) else { return }
+        let granted = userProfile.grantShareReward(platform: platform.rawValue)
+        try? DatabaseManager.shared.saveUserProfile(userProfile)
+        if granted {
+            withAnimation {
+                rewardToast = "Shared to \(platform.displayName)! You earned a free cast."
+            }
         }
     }
 }

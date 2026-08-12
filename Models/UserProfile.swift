@@ -47,8 +47,17 @@ final class UserProfile: Codable {
     /// 累计起卦次数（免费额度计量：前 freeCastAllowance 次免费，之后引导买断/微交易）
     var castsUsedTotal: Int
 
+    /// 分享社媒（TikTok/X）奖励的额外免费起卦次数（公司善意激励，封顶）
+    var bonusCastCredits: Int
+
+    /// 已因分享获得奖励的平台标识（防止重复刷取，持久化）
+    var rewardedSharePlatforms: [String]
+
     /// 免费起卦额度（体验用，耗尽后引导买断）
     static let freeCastAllowance = 3
+
+    /// 分享激励上限：每平台一次、最多 2 次（规避用分享替代买断的合规雷区）
+    static let maxShareBonusCasts = 2
 
     /// 创建日期
     var createdAt: Date
@@ -109,6 +118,23 @@ final class UserProfile: Codable {
         Double(unlockedHexagramIDs.count) / 64.0
     }
 
+    /// 有效免费起卦额度 = 基础额度 + 分享奖励额度
+    var effectiveFreeCastAllowance: Int {
+        UserProfile.freeCastAllowance + bonusCastCredits
+    }
+
+    /// 因分享到指定平台而授予一次免费起卦。已奖励过或达上限则返回 false。
+    /// - Parameter platform: 平台标识（"tiktok" / "x"）
+    /// - Returns: 是否本次新授予
+    @discardableResult
+    func grantShareReward(platform: String) -> Bool {
+        guard rewardedSharePlatforms.count < UserProfile.maxShareBonusCasts,
+              !rewardedSharePlatforms.contains(platform) else { return false }
+        rewardedSharePlatforms.append(platform)
+        bonusCastCredits += 1
+        return true
+    }
+
     init(
         displayName: String = "",
         bio: String = "",
@@ -123,6 +149,8 @@ final class UserProfile: Codable {
         streakDays: Int = 0,
         reflectionCountTotal: Int = 0,
         castsUsedTotal: Int = 0,
+        bonusCastCredits: Int = 0,
+        rewardedSharePlatforms: [String] = [],
         createdAt: Date = Date(),
         yiMemoryNote: String = "",
         castingStyle: CastingStyle = .default,
@@ -142,6 +170,8 @@ final class UserProfile: Codable {
         self.streakDays = streakDays
         self.reflectionCountTotal = reflectionCountTotal
         self.castsUsedTotal = castsUsedTotal
+        self.bonusCastCredits = bonusCastCredits
+        self.rewardedSharePlatforms = rewardedSharePlatforms
         self.createdAt = createdAt
         self.yiMemoryNote = yiMemoryNote
         self.castingStyle = castingStyle
