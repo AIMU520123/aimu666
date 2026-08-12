@@ -272,7 +272,7 @@ final class ModelManager {
 
         // 确保引擎已创建
         if engine == nil {
-            createEngine()
+            await createEngine()
         }
 
         // 执行加载
@@ -316,7 +316,12 @@ final class ModelManager {
 
     /// 内部卸载实现
     private func unloadModelInternal(reason: UnloadReason) async {
-        guard isReady || (if case .failed = state { true } else { false }) else { return }
+        let canUnload: Bool = {
+            if isReady { return true }
+            if case .failed = state { return true }
+            return false
+        }()
+        guard canUnload else { return }
 
         state = .unloading
         idleTimer?.cancel()

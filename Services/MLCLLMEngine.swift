@@ -492,8 +492,10 @@ extension LLMEngineFactory {
         MLCLLMEngine()
     }
 
+    #if canImport(MLCSwift)
     /// 创建带自定义配置的 MLC-LLM 引擎
     static func createMLCEngine(config: MLCInferenceConfig) -> MLCLLMEngine {
         MLCLLMEngine(inferenceConfig: config)
     }
+    #endif
 }
